@@ -255,32 +255,18 @@
         ========================= */
 
         const blogPosts = [
-            {
-                id: 'meaning-behind-digital-structures',
-                title: 'The Meaning Behind Digital Structures',
-                date: 'October 12, 2026',
-                readTime: '4 min',
-                image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&q=80',
-                caption: 'Order and logic in systems design.',
-                excerpt: 'Computers run on absolute binary truths, yet human creators operate in the fluid universe of meaning.',
-                content: `
-                    <p class="mb-4">Computers run on absolute binary truths—ones and zeroes, deterministic routines, and unyielding logical gates. Yet human creators operate in the fluid universe of meaning, ambiguity, and existential choice. In constructing software architectures, we project our internal frameworks of order into the void.</p>
-                    <p class="mb-4">When we write clean abstractions or build robust microservices, we aren't simply solving technical constraints. We are actively creating islands of predictability within an inherently unpredictable environment.</p>
-                `
-            },
-            {
-                id: 'ethics-of-automated-logic',
-                title: 'Ethics of Automated Logic',
-                date: 'September 28, 2026',
-                readTime: '6 min',
-                image: 'https://images.unsplash.com/photo-1507413245164-6160d8298b31?w=1200&q=80',
-                caption: 'Algorithms and moral responsibility.',
-                excerpt: 'When algorithms make decisions that impact individual human lives, code ceases to be purely mathematical.',
-                content: `
-                    <p class="mb-4">When algorithms make decisions that impact individual human lives, code ceases to be purely mathematical. Software engineering is intrinsically linked with moral responsibility.</p>
-                    <p class="mb-4">In an automated society, the developer's assumptions are multiplied millions of times over. Unchecked biases are no longer minor software bugs; they become real-world inequities.</p>
-                `
-            }
+            // {
+            //     id: '',
+            //     title: '',
+            //     date: '',
+            //     readTime: '',
+            //     image: '',
+            //     caption: '',
+            //     excerpt: '',
+            //     content: `
+            //         <p class="mb-4"></p>
+            //     `
+            // },
         ];
 
         const songsList = [
@@ -1029,6 +1015,7 @@
         ========================= */
 
         function renderBlogIndex() {
+            if (blogPosts.length !== 0){
             const list = blogPosts.map(post => `
                 <div class="space-y-1">
 
@@ -1070,6 +1057,28 @@
 
                 </div>
             `;
+            }
+            else {
+                return `
+                <div class="space-y-6">
+
+                    <div>
+                        <a href="#/home"
+                           class="text-xs font-mono text-stone-400 hover:underline">
+                            ← home
+                        </a>
+
+                        <h1 class="text-2xl font-normal mt-2 text-[#a881ec]">
+                            Essays & Blog
+                        </h1>
+                    </div>
+                     <p class="text-base font-normal mt-2 ">
+                            Coming Soon...
+                        </p>
+
+                </div>
+                `
+            }
         }
 
         /* =========================
