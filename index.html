@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>I, Me, Myself</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        prof: {
+                            light: '#7c4a32',
+                            dark: '#c4805e'
+                        },
+                        pers: {
+                            light: '#5e3a8c',
+                            dark: '#a881ec'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Lora', 'serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        };
+    </script>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400&family=Lora:ital,wght@0,400;0,500;1,400&display=swap"
+        rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+        }
+
+        body {
+            transition: background-color 0.25s ease, color 0.25s ease;
+            overflow: hidden;
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        /* Fixed gradient panel */
+        #panel-bg {
+            position: fixed;
+            inset: 5rem;
+            z-index: 0;
+            overflow: hidden;
+            border-radius: 1.5rem;
+            pointer-events: none;
+            transition: background-color 0.25s ease;
+            background-color: #1a1a1a;
+        }
+
+        #panel-glow {
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            filter: none;
+            transform: none;
+            background: transparent;
+        }
+
+        /* Content stays inside the gradient panel */
+        #app {
+            position: fixed;
+            inset: 5rem;
+            z-index: 10;
+            width: auto;
+            max-width: none;
+            overflow-y: auto;
+            overflow-x: hidden;
+            overscroll-behavior: contain;
+            border-radius: 1.5rem;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(120, 120, 120, 0.35) transparent;
+        }
+
+        #app::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        #app::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #app::-webkit-scrollbar-thumb {
+            background: rgba(120, 120, 120, 0.35);
+            border-radius: 999px;
+        }
+
+        /* Keep the original narrow editorial content width */
+        .page-content {
+            width: 100%;
+            max-width: 42rem;
+            min-height: 100%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* ---- Lightbox ---- */
+        #lightbox {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(10, 10, 10, 0.92);
+            backdrop-filter: blur(6px);
+            padding: 2rem;
+            cursor: zoom-out;
+            animation: lb-fade 0.2s ease;
+        }
+
+        #lightbox.open {
+            display: flex;
+        }
+
+        #lightbox img {
+            max-width: 92vw;
+            max-height: 88vh;
+            object-fit: contain;
+            border-radius: 6px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: lb-zoom 0.25s ease;
+        }
+
+        #lightbox-caption {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: #d6d3d1;
+            letter-spacing: 0.05em;
+        }
+
+        @keyframes lb-fade {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes lb-zoom {
+            from {
+                opacity: 0;
+                transform: scale(0.96);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Comfortable panel spacing on smaller screens */
+        @media (max-width: 640px) {
+
+            #panel-bg,
+            #app {
+                inset: 4.5rem 1rem 1rem;
+                border-radius: 1.25rem;
+            }
+
+            #app {
+                padding: 2rem 1.25rem;
+            }
+        }
+
+        @media (max-height: 500px) and (min-width: 641px) {
+
+            #panel-bg,
+            #app {
+                inset-top: 4rem;
+                inset-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-[#121212] text-[#e0e0e0] font-sans min-h-screen flex flex-col antialiased selection:bg-[#c4805e]/30">
+
+    <!-- Lightbox overlay -->
+    <div id="lightbox" onclick="closeLightbox()">
+        <img id="lightbox-img" src="" alt="">
+        <div id="lightbox-caption"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-[#121212]/90 backdrop-blur-md border-b border-stone-800">
+
+        <div class="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between text-sm">
+
+            <div class="flex items-center space-x-6">
+                <a href="#/home" class="font-medium tracking-tight text-base hover:opacity-70 transition">
+                    <span class="text-[#c4805e] font-medium">Aqiba's Safe Haven</span>
+                    |
+                    <span class="text-[#a881ec] font-medium">عاقبہ کی پناہ گاہ</span>
+                </a>
+
+                <div class="flex items-center space-x-3 text-xs font-mono">
+                    <!-- Optional direct navigation links -->
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-4">
+                <div id="breadcrumb" class="hidden sm:block text-xs font-mono text-stone-500">
+                </div>
+
+                <!-- Theme toggle removed, only dark mode stays -->
+                <span class="inline-flex items-center justify-center w-4 h-4">
+                    <i data-lucide="moon" class="w-4 h-4 text-indigo-400 fill-indigo-400"></i>
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Fixed background panel; its gradient changes by route -->
+    <div id="panel-bg" aria-hidden="true">
+        <div id="panel-glow"></div>
+    </div>
+
+    <!-- Scrollable content panel -->
+    <main id="app" class="px-6 py-12 md:py-16">
+        <!-- Views rendered here -->
+    </main>
+
+    <script>
+        /* =========================
+           DATA
+        ========================= */
+
+        const blogPosts = [
+            {
+                id: 'meaning-behind-digital-structures',
+                title: 'The Meaning Behind Digital Structures',
+                date: 'October 12, 2026',
+                readTime: '4 min',
+                image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&q=80',
+                caption: 'Order and logic in systems design.',
+                excerpt: 'Computers run on absolute binary truths, yet human creators operate in the fluid universe of meaning.',
+                content: `
+                    <p class="mb-4">Computers run on absolute binary truths—ones and zeroes, deterministic routines, and unyielding logical gates. Yet human creators operate in the fluid universe of meaning, ambiguity, and existential choice. In constructing software architectures, we project our internal frameworks of order into the void.</p>
+                    <p class="mb-4">When we write clean abstractions or build robust microservices, we aren't simply solving technical constraints. We are actively creating islands of predictability within an inherently unpredictable environment.</p>
+                `
+            },
+            {
+                id: 'ethics-of-automated-logic',
+                title: 'Ethics of Automated Logic',
+                date: 'September 28, 2026',
+                readTime: '6 min',
+                image: 'https://images.unsplash.com/photo-1507413245164-6160d8298b31?w=1200&q=80',
+                caption: 'Algorithms and moral responsibility.',
+                excerpt: 'When algorithms make decisions that impact individual human lives, code ceases to be purely mathematical.',
+                content: `
+                    <p class="mb-4">When algorithms make decisions that impact individual human lives, code ceases to be purely mathematical. Software engineering is intrinsically linked with moral responsibility.</p>
+                    <p class="mb-4">In an automated society, the developer's assumptions are multiplied millions of times over. Unchecked biases are no longer minor software bugs; they become real-world inequities.</p>
+                `
+            }
+        ];
+
+        const songsList = [
+            {
+                file: 'Alag Asmaan.m4a',
+                artist: 'Anuv Jain',
+            },
+            {
+                file: 'Banaam Sarkari Nizam.m4a',
+                artist: 'Mehdi Maloof',
+            },
+            {
+                file: 'Bijli.mp3',
+                artist: 'Mehdi Maloof',
+            },
+            {
+                file: 'Can’t Help Falling In Love With You.m4a',
+                artist: 'Elvis Presley',
+            },
+            {
+                file: 'Demons.m4a',
+                artist: 'Imagine Dragons',
+                note: 'A dark, introspective look at internal flaws, hidden shadows, and protecting others from them.'
+            },
+            {
+                file: 'Dil Khirki Ko Kholo.m4a',
+                artist: 'Mehdi Maloof',
+            },
+            {
+                file: 'Kaheen Main Khirki Tou Nhi.mp3',
+                artist: 'Mehdi Maloof',
+            },
+            {
+                file: 'Masjid Ki Deevar.mp3',
+                artist: 'Mehdi Maloof',
+            },
+            {
+                file: 'Mera Dost Pareshan Hai.mp3',
+                artist: 'Mehdi Maloof',
+            },
+            {
+                file: 'Peero.mp3',
+                artist: 'Mehdi Maloof',
+            },
+            {
+                file: 'Run Away.m4a',
+                artist: 'Aurora',
+            },
+            {
+                file: 'The Hanging Tree.m4a',
+                artist: 'The Hunger Games - Jennifer Lawrence',
+            },
+            {
+                file: 'The Simulation’s Ending.mp3',
+                artist: 'Degenrative Pixels - Opus 5.5',
+            },
+            {
+                file: 'Until I found You.m4a',
+                artist: 'Stephen Sanchez',
+            },
+            ,
+            {
+                file: 'Beautiful Day.mp3',
+                artist: 'Jermaine Edwards',
+            }
+        ].map(song => ({
+            ...song,
+            note: '',
+            title: song.file.replace(/\.(mp3|m4a)$/i, '').trim(),
+            audioUrl: `songs/${encodeURIComponent(song.file)}`
+        }));
+
+        const poetryList = [
+            {
+                title: 'I wish',
+                verses: `I wish, I wish, I wish
+                            You fly me to the moon.
+                            No byes or hugs or kisses,
+                            I wish you leave too soon.
+
+                            There in the lonesome sky,
+                            No dreams to chase anew,
+                            No unfinished errands,
+                            No lies or tears or rue.
+
+                            Here, chains I dig beneath
+                            To set myself unfree.
+                            My wings set ablaze,
+                            The fiery stars subdue.
+
+                            For wishes, they do change.
+                            To err is human too.
+                            But the path I tread that day
+                            Should ring eternally true.`
+            }
+        ];
+
+        /* =========================
+           THEME - now only dark, but keep updateThemeIcon for the static icon
+        ========================= */
+
+        function updateThemeIcon() {
+            const wrap = document.getElementById('theme-icon-wrap');
+            if (!wrap) return;
+            wrap.innerHTML = `
+                <i data-lucide="moon"
+                   class="w-4 h-4 text-indigo-400 fill-indigo-400"></i>
+            `;
+            lucide.createIcons();
+        }
+
+        /* =========================
+           PAGE GRADIENT MANAGEMENT
+        ========================= */
+
+        function updatePanelGradient(hash) {
+            const glow = document.getElementById('panel-glow');
+
+            if (!glow) return;
+
+            let gradient;
+
+            if (hash.startsWith('#/professional/')) {
+                gradient = `
+                    linear-gradient(
+                        135deg,
+                        rgba(200, 74, 50, 0.82),
+                        rgba(124, 74, 50, 0.08) 55%,
+                        rgba(124, 74, 50, 0.72)
+                    )
+                `;
+            } else if (hash.startsWith('#/personal/')) {
+                gradient = `
+                    linear-gradient(
+                        135deg,
+                        rgba(60, 58, 120, 0.5),
+                        rgba(94, 58, 140, 0.08) 55%,
+                        rgba(94, 58, 140, 0.72)
+                    )
+                `;
+            } else {
+                gradient = `
+                    linear-gradient(
+                        135deg,
+                        rgba(200, 74, 50, 0.82),
+                        transparent 48%,
+                        rgba(94, 58, 140, 0.82)
+                    )
+                `;
+            }
+
+            glow.style.background = gradient;
+        }
+
+        /* =========================
+           ROUTER
+        ========================= */
+
+        function router() {
+            const hash = window.location.hash || '#/home';
+            const app = document.getElementById('app');
+
+            updateBreadcrumb(hash);
+            updatePanelGradient(hash);
+
+            let content;
+
+            if (hash.startsWith('#/personal/blog/')) {
+                const id = hash.replace('#/personal/blog/', '');
+                content = renderBlogPost(id);
+            } else {
+                const routes = {
+                    '#/home': renderHome,
+                    '#/professional/education': renderEducation,
+                    '#/professional/projects': renderProjects,
+                    '#/professional/other': renderOther,
+                    '#/professional/contact': renderContact,
+                    '#/personal/blog': renderBlogIndex,
+                    '#/personal/songs': renderSongs,
+                    '#/personal/poetry': renderPoetry,
+                    '#/personal/photography': renderPhotography
+                };
+
+                content = (routes[hash] || renderHome)();
+            }
+
+            app.innerHTML = `
+                <div class="page-content">
+                    ${content}
+                </div>
+            `;
+
+            lucide.createIcons();
+
+            app.scrollTop = 0;
+        }
+
+        function updateBreadcrumb(hash) {
+            const breadcrumb = document.getElementById('breadcrumb');
+            if (breadcrumb) {
+                breadcrumb.innerText = hash.replace('#', '');
+            }
+        }
+
+        /* =========================
+           HOME
+        ========================= */
+
+        function renderHome() {
+            return `
+                <div class="space-y-6">
+
+                    <div class="space-y-2">
+                        <h1 class="text-4xl font-normal tracking-tight">
+                            Meet Aqiba...
+                        </h1>
+
+                        <p class="text-stone-400 leading-relaxed text-2xl">
+                            She has
+                            <span class="text-[#a881ec] font-medium">two</span>
+                            <span class="text-[#c4805e] font-medium">sides</span>.
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 border-t border-zinc-300 pt-10">
+
+                        <!-- Professional Side -->
+                        <div class="space-y-3">
+                            <h2 class="text-xl font-serif text-[#c4805e] font-bold">
+                                Boring Professional Side
+                            </h2>
+
+                            <ul class="text-stone-500 space-y-1.5 text-base pt-1 font-serif">
+                                <li>
+                                    <a href="#/professional/education"
+                                       class="block py-1.5 hover:translate-x-1 transition text-[#c4805e]">
+                                        Education & Experience →
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#/professional/projects"
+                                       class="block py-1.5 hover:translate-x-1 transition text-[#c4805e]">
+                                        Featured Projects →
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#/professional/other"
+                                       class="block py-1.5 hover:translate-x-1 transition text-[#c4805e]">
+                                        Other Stuff →
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="extra/resume.pdf"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="block py-1.5 hover:translate-x-1 transition text-[#c4805e]">
+                                            View CV →
+                                        </a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Personal Side -->
+                        <div class="space-y-3" style="transform: scaleX(-1) scaleY(-1);">
+                            <h2 class="text-left text-xl font-mono text-[#a881ec] font-bold">
+                                Unhinged Personal Side
+                            </h2>
+
+                            <ul class="text-stone-500 space-y-1.5 text-base pt-1 font-mono">
+                                <li>
+                                    <a href="#/personal/songs"
+                                       class="block py-1.5 hover:translate-x-1 transition text-[#a881ec]">
+                                        Current playlist  →
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="#/personal/poetry"
+                                       class="block py-1.5 hover:translate-x-1 transition text-[#a881ec] font-sans font-bold">
+                                        اناڑی کی شاعری →
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="#/personal/photography"
+                                       class="block py-1.5 hover:translate-x-1 transition text-[#a881ec]">
+                                        Pics dump →
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a href="#/personal/blog"
+                                       class="block py-1.5 hover:translate-x-1 transition text-[#a881ec]">
+                                        Blog →
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+                
+                    <!-- Social Links Footer -->
+                    <footer class="mt-10 border-t border-gray-700 pt-6 pb-4">
+                        <div class="flex justify-center items-center gap-4">
+
+                            <!-- LinkedIn -->
+                            <a href="https://pk.linkedin.com/in/aqiba-abdul-qadir" target="_blank" rel="noopener noreferrer"
+                            aria-label="LinkedIn"
+                            class="flex items-center justify-center w-12 h-12 rounded-full border-2 border-gray-500 text-gray-200 hover:text-blue-600 hover:border-blue-600 transition-all duration-300 hover:-translate-y-1">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+                                <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14ZM8.34 18V9.67H5.57V18h2.77ZM6.96 8.53a1.6 1.6 0 1 0 0-3.2 1.6 1.6 0 0 0 0 3.2ZM18.43 18v-4.57c0-2.45-1.3-3.59-3.04-3.59a2.63 2.63 0 0 0-2.37 1.3V9.67h-2.77V18h2.77v-4.12c0-1.09.21-2.15 1.56-2.15s1.35 1.26 1.35 2.22V18h2.5Z"/>
+                            </svg>
+                            </a>
+
+                            <!-- GitHub -->
+                            <a href="https://github.com/aqibaabdulqadir" target="_blank" rel="noopener noreferrer"
+                            aria-label="GitHub"
+                            class="flex items-center justify-center w-12 h-12 rounded-full border-2 border-gray-500 text-gray-200 hover:text-white hover:border-white transition-all duration-300 hover:-translate-y-1">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+                                <path d="M12 .9a11.1 11.1 0 0 0-3.51 21.63c.56.1.76-.24.76-.54v-2.1c-3.1.68-3.76-1.32-3.76-1.32-.5-1.3-1.23-1.64-1.23-1.64-1.01-.69.08-.68.08-.68 1.12.08 1.7 1.15 1.7 1.15.99 1.7 2.6 1.21 3.23.92.1-.72.39-1.21.7-1.49-2.48-.28-5.09-1.24-5.09-5.52 0-1.22.44-2.22 1.15-3-.12-.28-.5-1.42.11-2.96 0 0 .94-.3 3.05 1.14a10.6 10.6 0 0 1 5.55 0c2.12-1.44 3.05-1.14 3.05-1.14.61 1.54.23 2.68.11 2.96.72.78 1.15 1.78 1.15 3.01 0 4.29-2.61 5.23-5.1 5.5.4.35.75 1.03.75 2.08v3.09c0 .3.2.65.77.54A11.1 11.1 0 0 0 12 .9Z"/>
+                            </svg>
+                            </a>
+
+                            <!-- LeetCode -->
+                            <a href="https://leetcode.com/sulphite" target="_blank" rel="noopener noreferrer"
+                            aria-label="LeetCode"
+                            class="flex items-center justify-center w-12 h-12 rounded-full border-2 border-gray-500 text-gray-200 hover:text-orange-500 hover:border-orange-500 transition-all duration-300 hover:-translate-y-1">
+                            <svg viewBox="0 0 24 24" width="22" height="22"
+                                fill="none" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" stroke-linejoin="round"
+                                aria-hidden="true">
+                                <path d="M16 17.5 20 13.5 16 9.5"/>
+                                <path d="M20 13.5H10"/>
+                                <path d="M13 3.5 5.5 11a5 5 0 0 0 0 7l2 2a5 5 0 0 0 7 0l1.5-1.5"/>
+                                <path d="m10 6.5 3-3"/>
+                            </svg>
+                            </a>
+
+                            <!-- YouTube -->
+                            <a href="https://www.youtube.com/@aqibastechcorner" target="_blank" rel="noopener noreferrer"
+                            aria-label="YouTube"
+                            class="flex items-center justify-center w-12 h-12 rounded-full border-2 border-gray-500 text-gray-200 hover:text-red-600 hover:border-red-600 transition-all duration-300 hover:-translate-y-1">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+                                <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.2 3.6-6.2 3.6Z"/>
+                            </svg>
+                            </a>
+
+                            <!-- Email -->
+                            <a href="mailto:aqibaabdulqadir@gmail.com"
+                            aria-label="Email"
+                            class="flex items-center justify-center w-12 h-12 rounded-full border-2 border-gray-500 text-gray-200 hover:text-emerald-600 hover:border-emerald-600 transition-all duration-300 hover:-translate-y-1">
+                            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="3" y="5" width="18" height="14" rx="2"/>
+                                <path d="m3 7 9 6 9-6"/>
+                            </svg>
+                            </a>
+
+                        </div>
+                        <p class="text-center text-sm text-gray-400 mt-4">
+                            <br>"A total lack of originality is only a recommendation for the aggressively uninspired."<br>— Fyodor Dostoevsky, <em>The Idiot</em><br><br>
+                            &copy; 2026 Aqiba Abdul Qadir
+                        </p>
+                    </footer>
+                    
+                </div>
+            `;
+        }
+
+        /* =========================
+           EDUCATION
+        ========================= */
+
+        function renderEducation() {
+            const entries = [
+                {
+                    eyebrow: "UNDERGRADUATE · 2022 – 2026",
+                    title: "B.E. Computer Systems Engineering",
+                    institution: "NED University of Engineering and Technology",
+                    description:
+                        "2022: Was considering a BA in English. Since me too dumb for engineering.<br>2026: Somehow, graduated summa cum laude with three gold medals.",
+                    tags: []
+                },
+                {
+                    eyebrow: "CURRENT ROLE · JUL 2026 – PRESENT",
+                    title: "Associate Data Scientist",
+                    institution: "Veeam (formerly Securiti AI)",
+                    description:
+                        "Contributed to the integration of DS models into Securiti AI's Content Classification pipeline, focusing on model evaluation, performance optimization, rule-based feature development, and extraction workflows.",
+                    tags: []
+                }
+            ];
+
+            const items = entries.map(e => `
+            <div class="space-y-2 pb-6 border-b border-stone-400 last:border-0 last:pb-0">
+                <div class="text-xs font-mono text-stone-500">
+                    ${e.eyebrow}
+                </div>
+                <h3 class="text-lg md:text-xl font-medium leading-snug">
+                    ${e.title}
+                </h3>
+                <p class="text-sm text-[#c4805e]">
+                    ${e.institution}
+                </p>
+                <p class="text-sm text-stone-400 leading-relaxed font-serif pt-1">
+                    ${e.description}
+                </p>
+                ${e.tags.length ? `
+                    <div class="flex flex-wrap gap-2 pt-2">
+                        ${e.tags.map(t => `
+                            <span class="text-xs font-mono text-stone-400">
+                                ${t}
+                            </span>
+                        `).join('<span class="text-xs text-stone-600">·</span>')}
+                    </div>
+                ` : ''}
+            </div>
+        `).join('');
+
+            return `
+            <div class="space-y-6">
+                <div>
+                    <a href="#/home"
+                       class="text-xs font-mono text-stone-400 hover:underline">
+                        ← home
+                    </a>
+                    <h1 class="text-2xl font-normal mt-2 text-[#c4805e]">
+                        Education & Experience
+                    </h1>
+                </div>
+
+                <div class="border-t border-zinc-300 pt-8 space-y-6">
+                    ${items}
+                </div>
+            </div>
+        `;
+        }
+
+        /* =========================
+           PROJECTS
+        ========================= */
+
+        function renderProjects() {
+            const projects = [
+                {
+                    title: "FPGA-based Hardware Acceleration of CRYSTALS-Dilithium",
+                    description: "Final Year Design Project on hardware acceleration for post-quantum digital signatures.",
+                    details: "Best FYDP Award · CIS Department Exhibition · Still surprised",
+                    tech: "Verilog · FPGA · Vivado Design Suite",
+                    repo: "https://github.com/AqibaAbdulQadir/CRYSTALS-Dilithium"
+                },
+                {
+                    title: "Row Buffer Architecture for Neighbourhood Image Processing",
+                    description: "Hardware architecture for neighbourhood-based image processing.",
+                    details: "Up to 87.5% BRAM savings; multiple pixels per clock.",
+                    tech: "Verilog · Icarus Verilog · GTKWave",
+                    repo: "https://github.com/AqibaAbdulQadir/Efficient-RB-implementation-on-BRAM-for-NIP"
+                },
+                {
+                    title: "PII Masking with Named Entity Recognition",
+                    description: "Fine-tuned transformer models using synthetic data for PII detection and masking.",
+                    details: "",
+                    tech: "Python · Transformers · Google Colab",
+                    repo: "https://colab.research.google.com/drive/1VD4qEzYJGyFQmpPhg8VIRAGb9od1xBUI"
+                },
+                {
+                    title: "Hardware Acceleration of Schnorr's Signature Scheme",
+                    description: "Parameterized hardware modules for a cryptographic signature scheme.",
+                    details: "Was just a research experiment.",
+                    tech: "Verilog · Vivado · Artix-7 FPGA",
+                    repo: "https://github.com/AqibaAbdulQadir/Schnorrs-Algorithm-Verilog-Implementation-with-Discrete-Log-Hardness"
+                },
+                {
+                    title: "DNA Sequence Alignment Visualizer",
+                    description: "Visual exploration of global and local DNA sequence alignment.",
+                    details: "Basic, but was a way to pay tribute to one of our professors.",
+                    tech: "Python · NumPy · Matplotlib",
+                    repo: "http://github.com/AqibaAbdulQadir/Bioinformatics"
+                },
+                {
+                    title: "Quantum Playground",
+                    description: "Interactive exploration of quantum computing concepts and circuits.",
+                    details: "Did this for a hackathon. My brain is still entangled.",
+                    tech: "Python · Qiskit · Streamlit",
+                    repo: "http://github.com/AqibaAbdulQadir/QuantumComputing"
+                }
+            ];
+
+            const items = projects.map(p => `
+            <div class="space-y-2 pb-6 border-b border-stone-400 last:border-0 last:pb-0">
+                <h3 class="text-lg font-medium leading-snug">
+                    ${p.title}
+                </h3>
+                <p class="text-sm text-stone-400 leading-relaxed font-serif">
+                    ${p.description}
+                </p>
+                ${p.details ? `
+                    <p class="text-sm text-[#c4805e] italic">
+                        ${p.details}
+                    </p>
+                ` : ''}
+                <p class="text-xs font-mono text-stone-500">
+                    ${p.tech}
+                </p>
+                ${p.repo ? `
+                    <a href="${p.repo}"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="inline-flex items-center gap-1 text-xs font-mono text-stone-400 hover:underline pt-1">
+                        <i data-lucide="github" class="w-3 h-3"></i>
+                        repository ↗
+                    </a>
+                ` : ''}
+            </div>
+        `).join('');
+
+            return `
+            <div class="space-y-6">
+                <div>
+                    <a href="#/home"
+                       class="text-xs font-mono text-stone-400 hover:underline">
+                        ← home
+                    </a>
+                    <h1 class="text-2xl font-normal mt-2 text-[#c4805e]">
+                        Some Projects
+                    </h1>
+                </div>
+
+                <div class="border-t border-zinc-200 pt-8 space-y-6">
+                    ${items}
+                </div>
+            </div>
+        `;
+        }
+
+        /* =========================
+           OTHER (LeetCode etc)
+        ========================= */
+
+        function renderOther() {
+            const achievements = [
+                {
+                    title: "National Skill Competency Test",
+                    subtitle: "NEDUET · Apr 2026",
+                    highlight: "99.8th Percentile",
+                    description:
+                        "99.8th percentile competing with 40,784 candidates across 199 universities.<br>Don't know if it's something to brag about. The test mostly assessed theoretical CS concepts."
+                },
+                {
+                    title: "HackFusion, Speed Programming Winner",
+                    subtitle: "IEEE PES · Feb 2025",
+                    highlight: "1st Place",
+                    description:
+                        "Participated solo and won. Realised I needed to work more on participating efficiently with teams."
+                },
+                {
+                    title: "Section Leader · Code in Place",
+                    subtitle: "Stanford University · Apr – Jun 2024",
+                    highlight: "Selected from 2,000+ Applicants",
+                    description:
+                        "Taught Stanford's CS106A introductory programming curriculum to international students. Was a pretty fun experience. <br><br>"
+                }
+            ];
+
+            const recommendations = [
+                {
+                    name: "Hamza Kazi",
+                    role: "Data Science Mentor · Securiti.ai",
+                    date: "August 2025",
+                    quote: "I mentored Aqiba during her Summer Internship at Securiti.ai with the Data Science team.<br><br>" +
+                        "My experience was quite positive. She was able to easily understand the problem domain and get to work on it soon after joining. Was able to both follow overall guidelines quite well and also experiment independently with ideas for improving the task performance and her work made a significant impact in accuracy.<br><br>" +
+                        "In addition to this, what was a key factor in keeping communication running smoothly was her professional and methodical approach to keeping her work and results very well organised even without supervision. This is a quite essential skill for any future roles she might take.",
+                    url: "https://www.linkedin.com/in/hamza-kazi/"
+                },
+                {
+                    name: "Wen Yee Moo",
+                    role: "Code in Place Mentee",
+                    date: "June 2024",
+                    quote:
+                        "Aqiba is an exceptional educator and a true asset to a learning community. I had the privilege of being mentored by Aqiba during my time in Code in Place. Aqiba's patience and dedication truly set her apart. She consistently encourages her students to express their thought processes, ensuring that we not only understand the material but also learn how to think like a coder.<br><br>" +
+                        "What impressed me the most was Aqiba's ability to explain complex coding steps with remarkable clarity. Her teaching style is concise. Aqiba's passion for helping others succeed shines through in every interaction.",
+                    url: "https://www.linkedin.com/in/wen-yee-moo-a2bb71175/"
+                }
+            ];
+
+            const achievementItems = achievements.map(a => `
+            <div class="space-y-1.5 pb-5 border-b border-stone-400 last:border-0 last:pb-0">
+                <div class="text-xs font-mono text-amber-400">
+                    ${a.highlight}
+                </div>
+                <h3 class="text-base font-medium leading-snug">
+                    ${a.title}
+                </h3>
+                <p class="text-xs text-stone-500">
+                    ${a.subtitle}
+                </p>
+                <p class="text-sm text-stone-400 leading-relaxed font-serif pt-1">
+                    ${a.description}
+                </p>
+            </div>
+        `).join('');
+
+            const recItems = recommendations.map(r => `
+            <div class="space-y-3 pb-6 border-b border-stone-400 last:border-0 last:pb-0">
+                <p class="font-serif text-sm md:text-base text-stone-300 leading-relaxed italic">
+                    "${r.quote}"
+                </p>
+                <div class="flex items-baseline justify-between gap-3 pt-1">
+                    <div>
+                        <p class="text-sm font-medium">${r.name}</p>
+                        <p class="text-xs text-stone-500">
+                            ${r.role} · ${r.date}
+                        </p>
+                    </div>
+                    <a href="${r.url}"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="text-xs font-mono text-stone-400 hover:underline shrink-0">
+                        linkedin ↗
+                    </a>
+                </div>
+            </div>
+        `).join('');
+
+            return `
+            <div class="space-y-6">
+                <div>
+                    <a href="#/home"
+                       class="text-xs font-mono text-stone-400 hover:underline">
+                        ← home
+                    </a>
+                    <h1 class="text-2xl font-normal mt-2 text-[#c4805e]">
+                        Other Stuff
+                    </h1>
+                </div>
+
+                <!-- Problem Solving -->
+                <div class="border-t border-zinc-300 pt-3 space-y-4">
+                    <h2 class="text-sm font-mono uppercase tracking-widest text-stone-200">
+                        Problem Solving -- LeetCode
+                    </h2>
+                    <div class="border-t border-zinc-300 pt-3 space-y-6">
+                    
+                    <div class="text-sm font-mono text-stone-400 space-y-1 pt-1">
+                       
+                        <div>1,000+ problems solved</div>
+                        <div>1,620+ contest rating</div>
+                        <div>35+ badges</div>
+                         <p class="text-sm font-serif text-stone-400 leading-relaxed">
+                        <br>Still trying to be better. Might start
+                        participating in contests again in the next few weeks.
+                    </p>
+                        <a href="https://leetcode.com/u/Sulphite/"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="inline-flex items-center gap-1 text-xs font-mono text-[#c4805e] hover:underline pt-1">
+                        view profile
+                        <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
+                    </a>
+                    </div>
+                    
+                    <br> 
+                </div>
+
+                <!-- Achievements -->
+                <div class="border-t border-zinc-300 pt-4 space-y-4">
+                    <h2 class="text-sm font-mono uppercase tracking-widest text-stone-200">
+                        Achievements
+                    </h2>
+                    <div class="border-t border-zinc-300 pt-8 space-y-6">
+                    <div class="space-y-5">
+                        ${achievementItems}
+                    </div>
+                </div>
+
+                <!-- Recommendations -->
+                <div class="border-t border-zinc-300 pt-4 space-y-4">
+                    <h2 class="text-sm font-mono uppercase tracking-widest text-stone-200">
+                        Recommendations
+                    </h2>
+                    <div class="border-t border-zinc-300 pt-8 space-y-6">
+                    <div class="space-y-6">
+                        ${recItems}
+                    </div>
+                </div>
+            </div>
+        `;
+        }
+
+        /* =========================
+           CONTACT (kept but no theme toggle, minimal)
+        ========================= */
+
+        function renderContact() {
+            return `
+                <div class="space-y-6">
+
+                    <div>
+                        <a href="#/home"
+                           class="text-xs font-mono text-stone-400 hover:underline">
+                            ← home
+                        </a>
+
+                        <h1 class="text-2xl font-normal mt-2 text-[#c4805e]">
+                            Get in Touch
+                        </h1>
+                    </div>
+
+                    <form onsubmit="handleContactSubmit(event)"
+                          class="grid grid-cols-1 sm:grid-cols-2 gap-8 border-t border-zinc-300 pt-10">
+
+                        <div>
+                            <label class="block text-xs font-mono mb-1 text-stone-500">
+                                YOUR NAME
+                            </label>
+
+                            <input type="text" required
+                                class="w-full bg-transparent border border-stone-400 rounded px-3 py-2 focus:outline-none focus:border-[#c4805e]">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-mono mb-1 text-stone-500">
+                                MESSAGE
+                            </label>
+
+                            <textarea rows="4" required
+                                class="w-full bg-transparent border border-stone-400 rounded px-3 py-2 focus:outline-none focus:border-[#c4805e]"></textarea>
+                        </div>
+
+                        <button type="submit"
+                            class="px-4 py-2 bg-[#c4805e] text-stone-900 text-xs font-mono rounded hover:opacity-90 transition">
+                            Send Message
+                        </button>
+
+                        <p id="msg-status"
+                           class="hidden text-xs text-emerald-600 font-mono pt-2">
+                            Message sent successfully.
+                        </p>
+                    </form>
+
+                </div>
+            `;
+        }
+
+        /* =========================
+           BLOG INDEX
+        ========================= */
+
+        function renderBlogIndex() {
+            const list = blogPosts.map(post => `
+                <div class="space-y-1">
+
+                    <div class="text-xs font-mono text-stone-400">
+                        ${post.date} • ${post.readTime}
+                    </div>
+
+                    <h2 class="text-lg font-medium">
+                        <a href="#/personal/blog/${post.id}"
+                           class="hover:text-[#a881ec] hover:underline">
+                            ${post.title}
+                        </a>
+                    </h2>
+
+                    <p class="text-xs font-serif text-stone-400">
+                        ${post.excerpt}
+                    </p>
+
+                </div>
+            `).join('');
+
+            return `
+                <div class="space-y-6">
+
+                    <div>
+                        <a href="#/home"
+                           class="text-xs font-mono text-stone-400 hover:underline">
+                            ← home
+                        </a>
+
+                        <h1 class="text-2xl font-normal mt-2 text-[#a881ec]">
+                            Essays & Blog
+                        </h1>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 border-t border-zinc-300 pt-10">
+                        ${list}
+                    </div>
+
+                </div>
+            `;
+        }
+
+        /* =========================
+           BLOG POST
+        ========================= */
+
+        function renderBlogPost(id) {
+            const post = blogPosts.find(item => item.id === id);
+
+            if (!post) {
+                return `
+                    <p>
+                        Post not found.
+                        <a href="#/personal/blog" class="underline">
+                            Back to blog
+                        </a>
+                    </p>
+                `;
+            }
+
+            return `
+                <article class="space-y-6">
+
+                    <div>
+                        <a href="#/personal/blog"
+                           class="text-xs font-mono text-stone-400 hover:underline">
+                            ← all essays
+                        </a>
+
+                        <div class="text-xs font-mono text-stone-400 mt-3">
+                            ${post.date} • ${post.readTime}
+                        </div>
+
+                        <h1 class="text-2xl md:text-3xl font-normal mt-1 leading-tight">
+                            ${post.title}
+                        </h1>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 border-t border-zinc-300 pt-10">
+
+                        <img src="${post.image}"
+                             alt="${post.title}"
+                             class="w-full max-h-[360px] object-cover rounded">
+
+                        <p class="text-xs font-mono text-stone-400 text-center">
+                            ${post.caption}
+                        </p>
+
+                    </div>
+
+                    <div class="font-serif text-sm md:text-base text-stone-300 leading-relaxed space-y-4 pt-2">
+                        ${post.content}
+                    </div>
+
+                </article>
+            `;
+        }
+
+        /* =========================
+           SONGS
+        ========================= */
+
+        function renderSongs() {
+            const items = songsList.map(song => `
+                <div class="py-4 border-b border-stone-400 space-y-2">
+
+                    <div class="font-medium text-base">
+                        ${song.title}
+                    </div>
+
+                    <div class="text-xs text-stone-500 font-mono">
+                        ${song.artist}
+                    </div>
+
+                    <p class="text-xs font-serif text-stone-400">
+                        ${song.note}
+                    </p>
+
+                    <audio controls preload="none" class="w-full h-8 mt-2">
+                        <source
+                        src="${song.audioUrl}"
+                        type="${song.audioUrl.split('?')[0].toLowerCase().endsWith('.m4a')
+                    ? 'audio/mp4'
+                    : 'audio/mpeg'}">
+                        Your browser does not support the audio element.
+                    </audio>
+
+                </div>
+            `).join('');
+
+            return `
+                <div class="space-y-6">
+
+                    <div>
+                        <a href="#/home"
+                           class="text-xs font-mono text-stone-400 hover:underline">
+                            ← home
+                        </a>
+                        
+
+                        <h1 class="text-2xl font-normal mt-2 text-[#a881ec]">
+                            Vocals-Only Playlist
+                        </h1>
+                        <p class="text-stone-400 leading-relaxed text-lg">Spotify doesn't have acapellas. So I made my playlist here.<br> I know I have a weird taste.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 border-t border-zinc-300 pt-10">
+                        ${items}
+                    </div>
+
+                </div>
+            `;
+        }
+
+        /* =========================
+           POETRY
+        ========================= */
+
+        function renderPoetry() {
+            const items = poetryList.map(poem => `
+                <div class="space-y-3">
+
+                    <h3 class="font-medium text-base">
+                        ${poem.title}
+                    </h3>
+
+                    <pre class="font-serif text-sm text-stone-300 whitespace-pre-line leading-relaxed">${poem.verses}</pre>
+
+                </div>
+            `).join('');
+
+            return `
+                <div class="space-y-6">
+
+                    <div>
+                        <a href="#/home"
+                           class="text-xs font-mono text-stone-400 hover:underline">
+                            ← home
+                        </a>
+
+                        <h1 class="text-2xl font-normal mt-2 text-[#a881ec]">
+                            Poetry
+                        </h1>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 border-t border-zinc-300 pt-10">
+                        ${items}
+                    </div>
+
+                </div>
+            `;
+        }
+
+        /* =========================
+           PHOTOGRAPHY
+        ========================= */
+
+        function renderPhotography() {
+            const photos = [
+                { file: 'ZZ.jpeg', caption: 'My friend, ZZ. Now, dead.' },
+                { file: 'relaxingcats.png', caption: 'Catatoes' },
+                { file: 'leaf.jpeg', caption: 'A single leaf, or is it?' },
+                { file: 'airport.jpeg', caption: 'Jet lag' },
+                { file: 'Kaabah.jpeg', caption: 'Seeing the Kiswah change' },
+                { file: 'kuba.jpeg', caption: 'Masjid al-Quba, Madinah' },
+                { file: 'simpleflower.jpeg', caption: 'Jasmines are pretty' },
+                { file: 'art.jpeg', caption: 'Art in the most unimaginable places' },
+                { file: 'lizardegg.jpeg', caption: 'Lizard egg' },
+                { file: 'lol.jpeg', caption: "Engineering." },
+                { file: 'sunrisejeddah.jpeg', caption: 'Sunrise over Jeddah' },
+                { file: 'cheshiretower.jpeg', caption: 'Cheshire tower' },
+                { file: 'morningbliss.jpeg', caption: 'Morning' },
+                { file: 'swimmingpool.jpeg', caption: 'Swimming pool, yay' },
+                { file: 'dandelions.jpeg', caption: 'Dandelions in distress' },
+                { file: 'mountfuji.jpeg', caption: 'Mount Fuji...' },
+                { file: 'thepath.jpeg', caption: 'The path to CIS' },
+                { file: 'firstexp.jpeg', caption: 'First time in corporate' },
+                { file: 'namazarea.jpeg', caption: 'Prayer space' },
+                { file: 'tower.jpeg', caption: 'The infamous waterhead tower' },
+                { file: 'fpga.jpeg', caption: 'First time with FPGA board' },
+                { file: 'nedflower.jpeg', caption: 'Flowers in NED' },
+                { file: 'tree.jpeg', caption: 'The tree that got cut down' },
+                { file: 'jeddah.jpeg', caption: 'Jeddahlicious' },
+                { file: 'nedflower2.jpeg', caption: 'Flowers in NED II' },
+            ];
+
+            const grid = photos.map(p => `
+                    <figure class="space-y-2 group cursor-zoom-in"
+                            onclick="openLightbox('photos/${p.file}', '${p.caption}')">
+                        <img src="photos/${p.file}" alt="${p.caption}" loading="lazy"
+                            class="w-full h-48 object-cover rounded transition group-hover:opacity-85 group-hover:scale-[1.02]">
+                        <figcaption class="text-xs font-mono text-stone-400 text-center">${p.caption}</figcaption>
+                    </figure>
+                `).join('');
+
+            return `
+            <div class="page-glow pers"></div>
+            <div class="space-y-6">
+                <div class="view-heading">
+                    <a href="#/home"
+                           class="text-xs font-mono text-stone-400 hover:underline">
+                            ← home
+                        </a>
+                    <h1 class="text-2xl font-normal mt-2 text-[#a881ec]">Randoms</h1>
+                    <p class="text-stone-400 leading-relaxed text-lg">I suck at photography.
+                        Please bear with the poor quality captures.</p>
+                </div>
+                <div class="grid grid-cols-2 gap-4 border-t border-zinc-300 pt-6">
+                    ${grid}
+                </div>
+            </div>
+    `;
+        }
+
+        /* =========================
+           CONTACT FORM
+        ========================= */
+
+        function handleContactSubmit(event) {
+            event.preventDefault();
+
+            const statusElem = document.getElementById('msg-status');
+
+            if (statusElem) {
+                statusElem.classList.remove('hidden');
+            }
+
+            event.target.reset();
+        }
+
+        function openLightbox(src, caption) {
+            const lb = document.getElementById('lightbox');
+            const img = document.getElementById('lightbox-img');
+            const cap = document.getElementById('lightbox-caption');
+            img.src = src;
+            img.alt = caption || '';
+            cap.textContent = caption || '';
+            lb.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            const lb = document.getElementById('lightbox');
+            lb.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeLightbox();
+        });
+
+        /* =========================
+           INITIALIZATION
+        ========================= */
+
+        window.addEventListener('hashchange', router);
+
+        window.addEventListener('load', () => {
+            updateThemeIcon();
+            router();
+        });
+    </script>
+
+</body>
+
+</html>
